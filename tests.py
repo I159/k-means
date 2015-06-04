@@ -41,6 +41,15 @@ class TestRandompoinGenerator(unittest.TestCase):
 
 
 class TestCentroidsCalculation(unittest.TestCase):
-    def test_centroids_initialization(self):
+    """"""
+    def test_initial_number(self):
         points = list(point.random_points(100))
-        centroids.get_centroids(points)
+        cnts = centroids.get_initial_centroids(points, 3)
+        self.assertEquals(len(cnts), 3)
+
+    def test_initial_unique(self):
+        points = list(point.random_points(100))
+        cnts = centroids.get_initial_centroids(points, 3)
+        self.assertEquals(len(cnts), len(set(cnts)))
+
+
