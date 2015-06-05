@@ -29,8 +29,8 @@ def _get_next_centroid(distances, centroids):
 
     target_measures = itertools.chain(
             *[i for i in distances if i[0][0] in centroids])
-    next_centroid = max([i for i in target_measures if i not in centroids],
-            key=lambda x: x[2])[2]
+    next_centroid = max([i for i in target_measures if i[1] not in centroids],
+            key=lambda x: x[2])[1]
     return next_centroid
 
 
