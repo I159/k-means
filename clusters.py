@@ -2,28 +2,16 @@ import centroids
 import point
 
 
-class NotEnaughDataError(Exception):
-    """Not enough data.
-
-    Raise if no data provided or a number of points lesser than required number
-    of clusters."""
-    pass
-
-
 class Cluster(object):
     """Cluster object.
 
-    Contains all cluster points."""
+    Contains all cluster points and a centroid."""
 
 
     def __init__(self, centroid):
         self.points = []
         self.centroid = centroid
-
-    def recompute_centroid(self):
-        """Recompute a centroid relying on a binded points coordinates."""
-
-        import pdb; pdb.set_trace()
+        self.__old_centroids = [self.centroid]
 
     def __repr__(self):
         return ('<{module}.{name} object at {hex_id}.'
@@ -34,19 +22,21 @@ class Cluster(object):
                     centroid=self.centroid,
                     points=len(self.points))
 
+    def compute_centroid(self):
+        try:
+            coord_sum = reduce(
+                    lambda a, b: point.Point(a.x + b.x, a.y + b.y),
+                    self.points)
+            len_points = float(len(self.points))
+            new_ctrd = point.Point(
+                    coord_sum.x/len_points, coord_sum.y/len_points)
+        except TypeError:
+            return self.centroid
 
-def generate_clusters(num_points, num_clusters):
-    if num_clusters > num_points:
-        raise NotEnaughDataError(
-                "Too few point for the given number of clusters:\n"
-                " clusters: %s\n"
-                " points: %s.")
-    points = list(point.random_points(num_points))
-    _centroids = centroids.get_initial_centroids(points, num_clusters)
-    _clusters = [Cluster(i) for i in _centroids]
-    for _point in points:
-        # Find a closets to a point centroid and add the point to the centroid.
-        min(((c, c.centroid - _point) for c in _clusters),
-                key=lambda x: x[1])[0].points.append(_point)
+        if abs(self.centroid - new_ctrd) > 1 and\
+                not new_ctrd in self.__old_centroids:
+            self.__old_centroids.append(new_ctrd)
+            self.centroid = new_ctrd
+            return self.centroid
 
-    return _clusters
+        return False

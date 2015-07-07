@@ -1,5 +1,7 @@
 import itertools
 
+import excp
+
 
 def _gram_matrix(points):
     """Distance Gram matrix.
@@ -36,6 +38,8 @@ def _get_next_centroid(distances, centroids):
 
 def get_initial_centroids(points, c_number=2):
     """Get a given number of centroids from existing points."""
+    if len(points) < c_number:
+        raise excp.NotEnaughDataError(len(points), c_number)
 
     distances = list(_gram_matrix(points))
     exst_centroids = _get_two_centroids(distances)

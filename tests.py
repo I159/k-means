@@ -1,81 +1,103 @@
-import itertools
 import math
+import random
 import unittest
 
 import centroids
 import clusters
+import excp
 import point
-
-
-class TestPoint(unittest.TestCase):
-    """Test `Point` functionality."""
-
-    def test_assigment(self):
-        """Test point coordinates assignment."""
-        new_point = point.Point(x=1.5, y=2.3)
-        self.assertEquals((new_point.x, new_point.y), (1.5, 2.3))
-
-    def test_measure(self):
-        """Test points distance measure calculation."""
-        point1 = point.Point(x=2, y=3)
-        point2 = point.Point(x=4, y=5)
-
-        euclidean = lambda a, b: math.sqrt(
-                pow(a[0]-b[0], 2) + pow(a[1]-b[1], 2))
-        self.assertEquals(point1-point2, euclidean((2, 3), (4, 5)))
+import space
+import visualization
 
 
 class PointsMixIn(unittest.TestCase):
-    """Initialize 100 random points."""
     def setUp(self):
-        self.points = list(point.random_points(100))
-        super(PointsMixIn, self).setUp()
+        self.points_number = 999
+        self.points = list(self._points)
+
+    @property
+    def _points(self):
+        lim = self.points_number
+        while lim:
+            lim = lim - 1
+            yield point.Point(
+                    x=random.gauss(mu=self.points_number/2,
+                        sigma=self.points_number),
+                    y=random.gauss(mu=self.points_number/2,
+                        sigma=self.points_number))
 
 
-class TestRandomPoinGenerator(PointsMixIn):
-    """Test random points generation."""
-
-    def test_points_number(self):
-        """Test for correct generated points number."""
-        self.assertEqual(len(self.points), 100)
-
-    def test_unique(self):
-        """Test for uniqueness.
-
-        Test that a length of a points collection the same before and after
-        removing of a duplicate points."""
-        self.assertEquals(len(self.points), len(set(self.points)))
-
-
-class TestCentroidsCalculation(PointsMixIn):
-    """Test initial centroids calculation."""
-
-    def test_initial_number(self):
-        """Test for correct number of initialized centroids."""
-        cnts = centroids.get_initial_centroids(self.points, 3)
-        self.assertEquals(len(cnts), 3)
-
-    def test_initial_unique(self):
-        """Test for uniqueness."""
-        cnts = centroids.get_initial_centroids(self.points, 3)
-        self.assertEquals(len(cnts), len(set(cnts)))
-
-
-class TestCluster(unittest.TestCase):
-    """Test cluster computation."""
-
+class TestCluster(PointsMixIn):
     def setUp(self):
-        self.clusters = clusters.generate_clusters(999, 3)
         super(TestCluster, self).setUp()
+        self.cluster = clusters.Cluster(self.points[0])
+        self.cluster.points = self.points
 
-    def test_initialize_clusters(self):
-        """Test for proper number of points and cluster."""
-        self.assertEquals(len(self.clusters), 3)
-        self.assertEquals(len(
-            list(itertools.chain(*(i.points for i in self.clusters)))), 999)
+    def test_compute_centroid(self):
+        old_centroid = self.cluster.centroid
+        self.cluster.compute_centroid()
+        self.assertNotEqual(old_centroid, self.cluster.centroid)
+        self.assertFalse(self.cluster.compute_centroid())
 
-    def test_unique_initialize(self):
-        """Test for points bind uniqueness."""
-        binded_points = list(
-                itertools.chain(*(i.points for i in self.clusters)))
-        self.assertEquals(len(binded_points), len(set(binded_points)))
+
+class TestCentroid(PointsMixIn):
+    def test_two_centroids(self):
+        _centroids = centroids.get_initial_centroids(self.points)
+        self.assertEqual(len(_centroids), 2)
+        self.assertTrue(isinstance(_centroids[0], point.Point))
+
+    def test_multiple_centroids(self):
+        _centroids = centroids.get_initial_centroids(self.points, 10)
+        self.assertEqual(len(_centroids), 10)
+        self.assertTrue(isinstance(_centroids[0], point.Point))
+
+    def test_too_much_centrods(self):
+        self.assertRaises(excp.NotEnaughDataError,
+                          centroids.get_initial_centroids,
+                          self.points,
+                          len(self.points)+1)
+
+
+class TestPoint(PointsMixIn):
+    def setUp(self):
+        self.points_number = 2
+        self.points = list(self._points)
+
+    def test_point_sub(self):
+        exp_dist = math.sqrt(
+                pow(self.points[0].x - self.points[1].x, 2) +\
+                pow(self.points[0].y - self.points[1].y, 2))
+        dist = self.points[0] - self.points[1]
+        self.assertEqual(dist, exp_dist)
+
+
+class SpaceMixin(unittest.TestCase):
+    def setUp(self):
+        self.space = space.Space(999, 3)
+
+
+class TestSpace(SpaceMixin):
+    def test_stable_clusters(self):
+        self.space.compute_stable_clusters()
+        clusters = self.space.clusters
+        for point in self.space.points:
+            owner = min(clusters, key=lambda x: abs(x.centroid - point))
+            self.assertIn(point, owner.points)
+
+    def test_unique_points(self):
+        self.space.compute_stable_clusters()
+        clusters = self.space.clusters
+        cl1, cl2, cl3 = map(lambda x: set(x.points), clusters)
+        self.assertFalse(bool(cl1 & cl2 & cl3))
+
+    def test_all_points(self):
+        self.space.compute_stable_clusters()
+        clusters = self.space.clusters
+        self.assertEqual(sum((len(cl.points) for cl in clusters)),
+                         len(self.space.points))
+
+
+class TestVisualization(SpaceMixin):
+    def test_vizualization(self):
+        self.space.visualize()
+
