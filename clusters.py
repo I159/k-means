@@ -7,7 +7,6 @@ class Cluster(object):
 
     Contains all cluster points and a centroid."""
 
-
     def __init__(self, centroid):
         self.points = []
         self.centroid = centroid

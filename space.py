@@ -7,6 +7,19 @@ import point
 import visualization
 
 
+def no_output_generator(f):
+    """If you don't need a generator with all clusters conditions just call
+    pass generator=False and just compute it."""
+
+    def wrap(self, generator=True):
+        out = f(self)
+        if generator:
+            return out
+        for i in out:
+            pass
+    return wrap
+
+
 class Space(object):
     """Two dimensional space contains clustered random points.
 
@@ -46,6 +59,7 @@ class Space(object):
         self.__clusters = [clusters.Cluster(i) for i in _centroids]
         return self.__clusters
 
+    @no_output_generator
     def compute_stable_clusters(self):
         """Implemented as generator to track computation."""
         while any((i.compute_centroid() for i in self.clusters)):
@@ -56,7 +70,7 @@ class Space(object):
                         key=lambda x: x[1])[0].points.append(_point)
             yield self.clusters
 
-    def visualize(self):
+    def visualize(self, delay):
         plot = visualization.Plot(self.compute_stable_clusters(),
                                   self.num_clusters)
-        plot.visualize()
+        plot.visualize(delay=delay)

@@ -12,7 +12,7 @@ import visualization
 
 class PointsMixIn(unittest.TestCase):
     def setUp(self):
-        self.points_number = 999
+        self.points_number = 99
         self.points = list(self._points)
 
     @property
@@ -41,12 +41,8 @@ class TestCluster(PointsMixIn):
 
 
 class TestCentroid(PointsMixIn):
-    def test_two_centroids(self):
-        _centroids = centroids.get_initial_centroids(self.points)
-        self.assertEqual(len(_centroids), 2)
-        self.assertTrue(isinstance(_centroids[0], point.Point))
 
-    def test_multiple_centroids(self):
+    def test_centroids(self):
         _centroids = centroids.get_initial_centroids(self.points, 10)
         self.assertEqual(len(_centroids), 10)
         self.assertTrue(isinstance(_centroids[0], point.Point))
@@ -73,12 +69,12 @@ class TestPoint(PointsMixIn):
 
 class SpaceMixin(unittest.TestCase):
     def setUp(self):
-        self.space = space.Space(999, 3)
+        self.space = space.Space(99, 3)
 
 
 class TestSpace(SpaceMixin):
     def test_stable_clusters(self):
-        self.space.compute_stable_clusters()
+        self.space.compute_stable_clusters(False)
         clusters = self.space.clusters
         for point in self.space.points:
             owner = min(clusters, key=lambda x: abs(x.centroid - point))
@@ -91,7 +87,7 @@ class TestSpace(SpaceMixin):
         self.assertFalse(bool(cl1 & cl2 & cl3))
 
     def test_all_points(self):
-        self.space.compute_stable_clusters()
+        self.space.compute_stable_clusters(False)
         clusters = self.space.clusters
         self.assertEqual(sum((len(cl.points) for cl in clusters)),
                          len(self.space.points))
@@ -99,5 +95,5 @@ class TestSpace(SpaceMixin):
 
 class TestVisualization(SpaceMixin):
     def test_vizualization(self):
-        self.space.visualize()
+        self.space.visualize(delay=1)
 
