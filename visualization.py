@@ -11,8 +11,11 @@ class DynamicPlot(object):
     def __init__(self, clusters):
         self.clusters = clusters
         plot.sign_in(os.environ['name'], os.environ['key'])
-        self.layout = graph_objs.Layout(xaxis=graph_objs.XAxis(autorange=True),
-                             yaxis=graph_objs.YAxis(autorange=True))
+        self.layout = graph_objs.Layout(
+                title="K-means clustering computation result.",
+                xaxis=graph_objs.XAxis(autorange=True),
+                yaxis=graph_objs.YAxis(autorange=True),
+                legend=graph_objs.Legend(yref='paper'))
 
     def visualize(self, delay):
         tokens = os.environ['tokens'].split()
@@ -49,19 +52,32 @@ class StaticPlot(object):
     def __init__(self, clusters):
         self.clusters = clusters
         plot.sign_in(os.environ['name'], os.environ['key'])
-        self.layout = graph_objs.Layout(xaxis=graph_objs.XAxis(autorange=True),
-                             yaxis=graph_objs.YAxis(autorange=True))
+        self.layout = graph_objs.Layout(
+                title="K-means clustering computation result.",
+                xaxis=graph_objs.XAxis(autorange=True),
+                yaxis=graph_objs.YAxis(autorange=True))
 
     def make_scatter(self, name, x, y):
         return graph_objs.Scatter(x=x, y=y, mode='markers', name=name)
+
+    def make_centroids_scatter(self, x, y):
+        text = ['cluster #{}'.format(i) for i in range(len(x))]
+        return graph_objs.Scatter(
+                text=text,
+                x=x,
+                y=y,
+                mode='markers',
+                name='centroids',
+                marker=graph_objs.Marker(size=10))
 
     def visualize(self):
         norm_points = [zip(*cl.points) for cl in self.clusters]
         scatters = [self.make_scatter(
             'cluster #{}'.format(i), *v) for i, v in enumerate(norm_points)]
         centroids = zip(*[i.centroid for i in self.clusters])
-        scatters.append(self.make_scatter('centroids', *centroids))
+        scatters.append(self.make_centroids_scatter(*centroids))
 
         data = graph_objs.Data(scatters)
-        plot.plot(data)
+        fig = graph_objs.Figure(data=data, layout=self.layout)
+        plot.plot(fig)
         plot.image.save_as({'data': data}, 'k-means.png')
