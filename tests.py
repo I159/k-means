@@ -69,7 +69,7 @@ class TestPoint(PointsMixIn):
 
 class SpaceMixin(unittest.TestCase):
     def setUp(self):
-        self.space = space.Space(99, 3)
+        self.space = space.Space(999, 3)
 
 
 class TestSpace(SpaceMixin):
@@ -95,5 +95,7 @@ class TestSpace(SpaceMixin):
 
 class TestVisualization(SpaceMixin):
     def test_vizualization(self):
-        self.space.visualize(delay=1)
+        self.space.visualize_dynamic(delay=1)
 
+    def test_static_visualization(self):
+        self.space.vizualize()

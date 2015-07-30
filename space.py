@@ -16,7 +16,8 @@ def no_output_generator(f):
         if generator:
             return out
         for i in out:
-            pass
+            result = i
+            return result
     return wrap
 
 
@@ -70,7 +71,13 @@ class Space(object):
                         key=lambda x: x[1])[0].points.append(_point)
             yield self.clusters
 
-    def visualize(self, delay):
-        plot = visualization.Plot(self.compute_stable_clusters(),
-                                  self.num_clusters)
+    def visualize_dynamic(self, delay):
+        plot = visualization.DynamicPlot(
+              self.compute_stable_clusters())
         plot.visualize(delay=delay)
+
+    def vizualize(self):
+        plot = visualization.StaticPlot(
+                self.compute_stable_clusters(False))
+        plot.visualize()
+
