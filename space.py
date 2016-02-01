@@ -11,11 +11,11 @@ def no_output_generator(f):
     """If you don't need a generator with all clusters conditions just call
     pass generator=False and just compute it."""
 
-    def wrap(self, generator=True):
-        out = f(self)
-        if generator:
-            return out
-        for i in out:
+    def wrap(self, output=True):
+        generator = f(self)
+        if output:
+            return generator
+        for i in generator:
             result = i
             return result
     return wrap
@@ -74,9 +74,11 @@ class Space(object):
             yield self.clusters
 
     def visualize_dynamic(self, delay):
-        plot = visualization.DynamicPlot(self.compute_stable_clusters())
+        plot = visualization.DynamicPlot(
+              self.compute_stable_clusters())
         plot.visualize(delay=delay)
 
     def vizualize(self):
-        plot = visualization.StaticPlot(self.compute_stable_clusters())
+        plot = visualization.StaticPlot(
+                self.compute_stable_clusters())
         plot.visualize()

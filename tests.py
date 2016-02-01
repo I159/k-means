@@ -74,20 +74,20 @@ class SpaceMixin(unittest.TestCase):
 
 class TestSpace(SpaceMixin):
     def test_stable_clusters(self):
-        self.space.compute_stable_clusters()
+        self.space.compute_stable_clusters(output=False)
         clusters = self.space.clusters
         for point in self.space.points:
             owner = min(clusters, key=lambda x: abs(x.centroid - point))
             self.assertIn(point, owner.points)
 
     def test_unique_points(self):
-        self.space.compute_stable_clusters()
+        self.space.compute_stable_clusters(output=False)
         clusters = self.space.clusters
         cl1, cl2, cl3 = map(lambda x: set(x.points), clusters)
         self.assertFalse(bool(cl1 & cl2 & cl3))
 
     def test_all_points(self):
-        self.space.compute_stable_clusters()
+        self.space.compute_stable_clusters(output=False)
         clusters = self.space.clusters
         self.assertEqual(sum((len(cl.points) for cl in clusters)),
                          len(self.space.points))
