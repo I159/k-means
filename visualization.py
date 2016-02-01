@@ -43,7 +43,8 @@ class DynamicPlot(object):
             norm_points = [zip(('x', 'y'), zip(*cl.points)) for cl in cls]
             for cl_points, stream in zip(map(dict, norm_points), streams[1:]):
                 time.sleep(delay)
-                streams[0].write(zip(('x', 'y'), zip(*[i.centroid for i in cls])),
+                streams[0].write(
+                        zip(('x', 'y'), zip(*[i.centroid for i in cls])),
                         self.layout)
                 stream.write(cl_points, self.layout)
 

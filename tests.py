@@ -60,9 +60,9 @@ class TestPoint(PointsMixIn):
         self.points = list(self._points)
 
     def test_point_sub(self):
-        exp_dist = math.sqrt(
-                pow(self.points[0].x - self.points[1].x, 2) +\
-                pow(self.points[0].y - self.points[1].y, 2))
+        x_quadratic = pow(self.points[0].x - self.points[1].x, 2)
+        y_quadratic = pow(self.points[0].y - self.points[1].y, 2)
+        exp_dist = math.sqrt(x_quadratic + y_quadratic)
         dist = self.points[0] - self.points[1]
         self.assertEqual(dist, exp_dist)
 
@@ -74,7 +74,7 @@ class SpaceMixin(unittest.TestCase):
 
 class TestSpace(SpaceMixin):
     def test_stable_clusters(self):
-        self.space.compute_stable_clusters(False)
+        self.space.compute_stable_clusters()
         clusters = self.space.clusters
         for point in self.space.points:
             owner = min(clusters, key=lambda x: abs(x.centroid - point))
@@ -87,7 +87,7 @@ class TestSpace(SpaceMixin):
         self.assertFalse(bool(cl1 & cl2 & cl3))
 
     def test_all_points(self):
-        self.space.compute_stable_clusters(False)
+        self.space.compute_stable_clusters()
         clusters = self.space.clusters
         self.assertEqual(sum((len(cl.points) for cl in clusters)),
                          len(self.space.points))

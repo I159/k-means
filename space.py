@@ -2,7 +2,7 @@ import random
 
 import centroids
 import clusters
-import exceptions
+import excp
 import point
 import visualization
 
@@ -67,17 +67,16 @@ class Space(object):
             for cl in self.clusters:
                 cl.points = []
             for _point in self.points:
-                min(((c, c.centroid - _point) for c in self.clusters),
-                        key=lambda x: x[1])[0].points.append(_point)
+                key = lambda x: x[1]
+                eu_dists = ((c, c.centroid - _point) for c in self.clusters)
+                closest = min(eu_dists, key=key)
+                closest[0].points.append(_point)
             yield self.clusters
 
     def visualize_dynamic(self, delay):
-        plot = visualization.DynamicPlot(
-              self.compute_stable_clusters())
+        plot = visualization.DynamicPlot(self.compute_stable_clusters())
         plot.visualize(delay=delay)
 
     def vizualize(self):
-        plot = visualization.StaticPlot(
-                self.compute_stable_clusters(False))
+        plot = visualization.StaticPlot(self.compute_stable_clusters())
         plot.visualize()
-
